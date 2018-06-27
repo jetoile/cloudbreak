@@ -1,17 +1,17 @@
 package com.sequenceiq.it.cloudbreak;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
 import com.sequenceiq.cloudbreak.api.model.repositoryconfig.RepoConfigValidationRequest;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.RepositoryConfigs;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 public class RepositoryConfigsTests extends CloudbreakTest {
     private static final String VALID_AMBARI_BASE_URL = "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.3";
 
-    private static final String VALID_AMBARI_GPGKEY_URL = "http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins";
+    private static final String VALID_AMBARI_GPGKEY_URL = "http://public-repo-1.hortonworks.com/ambari/centos7/"
+            + "RPM-GPG-ACCOUNT_NAME/RPM-GPG-ACCOUNT_NAME-Jenkins";
 
     private static final String VALID_MPACK_URL = "http://private-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.5-2/HDP-2.6.4.5-2.xml";
 
