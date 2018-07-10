@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -21,6 +22,9 @@ import com.sequenceiq.cloudbreak.aspect.PermissionType;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
+import com.sequenceiq.cloudbreak.domain.security.User;
+import com.sequenceiq.cloudbreak.domain.security.UserToOrganization;
+import com.sequenceiq.cloudbreak.repository.security.UserRepository;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 
 @Service
@@ -34,6 +38,9 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
     @Inject
     @Lazy
     private UserDetailsService userDetailsService;
+
+    @Inject
+    private UserRepository userRepository;
 
     @Override
     public boolean hasPermission(Authentication authentication, Object target, Object permission) {
@@ -50,9 +57,16 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
         }
 
         IdentityUser user = userDetailsService.getDetails((String) authentication.getPrincipal(), UserFilterField.USERNAME);
+
+        // or could be findById when the ID is String instead of Double
+        User cbUser = userRepository.findByEmail(user.getUserId());
+        Set<UserToOrganization> organizations = cbUser.getOrganizations();
+
         Collection<?> targets = target instanceof Collection ? (Collection<?>) target : Collections.singleton(target);
         return targets.stream().allMatch(t -> {
             try {
+                // TODO: check if organization of the resource is in the list of the user's organizations
+                // TODO: also check by role: organizations.iterator().next().getRole()
                 return hasPermission(user, p, t);
             } catch (IllegalAccessException e) {
                 LOGGER.error("Object doesn't have properties to check permission with class: " + t.getClass().getCanonicalName(), e);

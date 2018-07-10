@@ -1,14 +1,14 @@
 -- // BUG-106826_authorization_domain_model
 -- Migration SQL that makes the change goes here.
 
-CREATE TABLE tenant (
+CREATE TABLE IF NOT EXISTS tenant (
     id              bigserial NOT NULL,
     name            VARCHAR (255) NOT NULL,
 
     CONSTRAINT      tenant_id                               PRIMARY KEY (id)
 );
 
-CREATE TABLE organization (
+CREATE TABLE IF NOT EXISTS organization (
     id              bigserial NOT NULL,
     name            VARCHAR (255),
     tenant_id       int8 NOT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE organization (
     CONSTRAINT      fk_organization_tenant                  FOREIGN KEY (tenant_id) REFERENCES tenant(id)
 );
 
-CREATE TABLE organization_properties (
+CREATE TABLE IF NOT EXISTS organization_properties (
     id              bigserial NOT NULL,
     property_name   VARCHAR (255) NOT NULL,
     property_value  VARCHAR (255) NOT NULL,
@@ -27,7 +27,8 @@ CREATE TABLE organization_properties (
     CONSTRAINT      fk_organization_property_organization   FOREIGN KEY (organization_id) REFERENCES organization(id)
 );
 
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
+--  maybe a varchar ID would be better?
     id              bigserial NOT NULL,
     name            VARCHAR (255),
     email           VARCHAR (255) NOT NULL UNIQUE,
@@ -40,7 +41,7 @@ CREATE TABLE users (
     CONSTRAINT      fk_user_tenant                          FOREIGN KEY (tenant_id) REFERENCES tenant(id)
 );
 
-CREATE TABLE user_to_organization (
+CREATE TABLE IF NOT EXISTS user_to_organization (
     id              bigserial NOT NULL,
     role            VARCHAR (255),
     user_id         int8 NOT NULL,
@@ -62,6 +63,8 @@ ALTER TABLE recipe
 ALTER TABLE blueprint
     ADD organization_id int8,
     ADD CONSTRAINT fk_blueprint_organization FOREIGN KEY (organization_id) REFERENCES organization(id);
+
+-- TODO: should add organization column to every table
 
 -- //@UNDO
 -- SQL to undo the change goes here.
