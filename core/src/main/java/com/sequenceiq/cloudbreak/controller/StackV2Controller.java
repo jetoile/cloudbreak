@@ -3,9 +3,11 @@ package com.sequenceiq.cloudbreak.controller;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.api.model.GeneratedBlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.ReinstallRequestV2;
+import com.sequenceiq.cloudbreak.api.model.stack.StackImageChangeRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackScaleRequestV2;
@@ -42,6 +45,7 @@ import com.sequenceiq.cloudbreak.service.OperationRetryService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
+import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
@@ -77,6 +81,9 @@ public class StackV2Controller extends NotificationController implements StackV2
 
     @Autowired
     private ClusterService clusterService;
+
+    @Inject
+    private StackImageUpdateService stackImageUpdateService;
 
     @Override
     public Set<StackResponse> getPrivates() {
@@ -273,4 +280,12 @@ public class StackV2Controller extends NotificationController implements StackV2
         clusterService.repairCluster(stack.getId(), clusterRepairRequest.getHostGroups(), clusterRepairRequest.isRemoveOnly());
         return Response.accepted().build();
     }
+
+    @Override
+    public Response changeImage(String stackName, StackImageChangeRequest stackImageChangeRequest) {
+        IdentityUser user = authenticatedUserService.getCbUser();
+        Stack stack = stackService.getPublicStack(stackName, user);
+        stackService.updateImage(stack.getId(), stackImageChangeRequest.getImageId());
+        return Response.status(Status.NO_CONTENT).build();
+        }
 }

@@ -804,6 +804,10 @@ public class StackService {
         return stackRepository.findStackForCluster(id);
     }
 
+    public void updateImage(Long stackId, String imageId) {
+        flowManager.triggerStackImageUpdate(stackId, imageId);
+    }
+
     private enum Msg {
         STACK_STOP_IGNORED("stack.stop.ignored"),
         STACK_START_IGNORED("stack.start.ignored"),
